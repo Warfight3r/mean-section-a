@@ -1,0 +1,50 @@
+const parser = require('simple-excel-to-json')
+const json2xls = require('json2xls');
+const doc = parser.parseXls2Json('./Assignment.xlsx')[0];
+const fs = require("fs");
+//Sort Assignment doc based on CGPA.
+//Each elective will have 50 seats
+
+const seats={
+    "Fundamentals of Web Technologies": 50,
+    "User Interface/User Experience (UI/UX) Design": 50,
+    "Internet, Technology and Society": 50,
+    "Enterprise Resource Planning": 50
+}
+
+
+const totalCgpa = doc.reduce((prevValue, current) => {
+    prevValue += current.CGPA
+    return prevValue
+}, 0);
+const average = totalCgpa / doc.length;
+const docWithAverage = [...doc];
+const gradedDocuments = docWithAverage.map((student) => {
+    if (student.CGPA >=9.5){
+    student.GRADE = "A+"
+    return student
+} else if (student.CGPA >=9.2 && student.CGPA <9.5) {
+    student.GRADE= "A"
+}
+else if (student.CGPA >=8.7 && student.CGPA <9.2){
+    student.GRADE= "B"
+}
+else if (student.CGPA >=8.5 && student.CGPA <8.7){
+    student.GRADE= "C"
+}
+else if (student.CGPA >=8.2 && student.CGPA < 8.5){
+    student.GRADE="D"
+}
+return student
+})
+const filteredDocument = gradedDocuments.filter((student) => {
+    if(student.CGPA > 8){
+        return true
+    }
+    else{
+        return false
+    }
+})
+const xlsData= json2xls(filteredDocument)
+fs.writeFileSync('filtered.xlsx', xlsData
+, 'binary');
